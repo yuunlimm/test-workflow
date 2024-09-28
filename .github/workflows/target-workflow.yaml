@@ -1,4 +1,3 @@
-
 name: Test Workflow Trigger
 
 on:
@@ -14,5 +13,6 @@ jobs:
         run: echo "Workflow triggered by repository_dispatch event."
 
       - name: Log Commit Hash
-        if: github.event_name == 'repository_dispatch'
-        run: echo "Commit Hash: ${{ github.event.client_payload.commit_hash }}"
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        run: |
+          echo "Commit Hash: ${{ github.event.client_payload.commit_hash }}"
