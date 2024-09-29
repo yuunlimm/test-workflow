@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-dependency = { path = "/Users/yuunlim/test-workflow2/dependency" }
+test-workflow2 = { git = "https://github.com/yuunlimm/test-workflow2.git", rev = "e89494d63aea608a464e71df0edfd49710b24276" }

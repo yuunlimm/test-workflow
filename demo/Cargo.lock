@@ -6,9 +6,10 @@ version = 3
 name = "demo"
 version = "0.1.0"
 dependencies = [
- "dependency",
+ "test-workflow2",
 ]
 
 [[package]]
-name = "dependency"
+name = "test-workflow2"
 version = "0.1.0"
+source = "git+https://github.com/yuunlimm/test-workflow2.git?rev=e89494d63aea608a464e71df0edfd49710b24276#e89494d63aea608a464e71df0edfd49710b24276"

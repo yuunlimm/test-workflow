@@ -1,0 +1,33 @@
+name: Update depednecies and no comit
+
+on:
+  repository_dispatch:
+    types: [json-change-detected]  # Listen for dispatched events
+
+jobs:
+  update_dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure the full history is fetched
+          ref: main  # Ensure you're checking out the correct branch
+
+      - name:  Show Cargo.toml Before Update
+        run: cat demo/Cargo.toml  # Print the contents of Cargo.toml before the update
+
+      - name: Update Cargo.toml with new commit hash
+        run: |
+          echo "Updating dependency in Cargo.toml to use commit hash ${{ github.event.client_payload.commit_hash }}"
+          # Update the dependency to use the correct Git URL and commit hash
+          sed -i 's|path = ".*"|git = "https://github.com/yuunlimm/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"|g' demo/Cargo.toml
+
+      - name:  Show Cargo.toml After Update
+        run: cat demo/Cargo.toml  # Print the contents of Cargo.toml after the update
+
+      - name: Run Tests
+        run: |
+          echo "Running tests with updated Cargo.toml"
+          cargo test --manifest-path=demo/Cargo.toml
