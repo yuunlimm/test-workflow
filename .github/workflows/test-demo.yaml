@@ -11,22 +11,28 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure the full history is fetched
+          ref: main  # Make sure you're on the correct branch
+
+      - name: Verify Cargo.toml
+        run: ls -al test-workflow/demo  # This will verify that the Cargo.toml exists in the expected directory
 
       - name: Update Cargo.toml with new commit hash
         run: |
           echo "Updating aptos-system-utils and aptos-indexer-test-transactions to use https://github.com/yuunlimm/test-workflow2.git with commit hash ${{ github.event.client_payload.commit_hash }}"
-          # Update both dependencies to point to the new repo with the new commit hash
-          sed -i 's/git = ".*", rev = ".*"/git = "https:\/\/github.com\/yuunlimm\/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"/' Cargo.toml
+          # Update both dependencies to point to the new repo with the new commit hash in the correct path
+          sed -i 's/git = ".*", rev = ".*"/git = "https:\/\/github.com\/yuunlimm\/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"/' test-workflow/demo/Cargo.toml
 
       - name: Commit updated Cargo.toml
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add Cargo.toml
+          git add test-workflow/demo/Cargo.toml
           git commit -m "Update dependencies to https://github.com/yuunlimm/test-workflow2.git with commit ${{ github.event.client_payload.commit_hash }}"
           git push origin ${{ github.ref }}
 
       - name: Run Processor Tests
         run: |
           echo "Running processor tests for commit ${{ github.event.client_payload.commit_hash }}"
-          cargo test
+          cargo test --manifest-path=test-workflow/demo/Cargo.toml
