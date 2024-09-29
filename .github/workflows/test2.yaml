@@ -1,0 +1,33 @@
+name: Run Processor Tests on JSON Change
+
+on:
+  repository_dispatch:
+    types: [json-change-detected]
+
+jobs:
+  update_and_run_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Update Cargo.toml with New Commit Hash
+        run: |
+          echo "Updating aptos-system-utils and aptos-indexer-test-transactions with commit hash ${{ github.event.client_payload.commit_hash }}"
+          # Update both dependencies in Cargo.toml with the new commit hash
+          sed -i 's/aptos-system-utils = { git = ".*", rev = ".*" }/aptos-system-utils = { git = "https:\/\/github.com\/aptos-labs\/aptos-core.git", rev = "${{ github.event.client_payload.commit_hash }}" }/' Cargo.toml
+          sed -i 's/aptos-indexer-test-transactions = { git = ".*", rev = ".*" }/aptos-indexer-test-transactions = { git = "https:\/\/github.com\/aptos-labs\/aptos-core.git", rev = "${{ github.event.client_payload.commit_hash }}" }/' Cargo.toml
+
+      - name: Commit Changes to Cargo.toml
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Cargo.toml
+          git commit -m "Update dependencies to commit ${{ github.event.client_payload.commit_hash }}"
+          git push origin ${{ github.ref }}
+
+      - name: Run Processor Tests
+        run: |
+          echo "Running processor tests for commit ${{ github.event.client_payload.commit_hash }}"
+          cargo test --features "integration-tests"

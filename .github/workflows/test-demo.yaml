@@ -1,0 +1,32 @@
+name: Update Dependencies and Run Tests for demo
+
+on:
+  repository_dispatch:
+    types: [json-change-detected]  # Listen for dispatched events
+
+jobs:
+  update_dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Update Cargo.toml with new commit hash
+        run: |
+          echo "Updating aptos-system-utils and aptos-indexer-test-transactions to use https://github.com/yuunlimm/test-workflow2.git with commit hash ${{ github.event.client_payload.commit_hash }}"
+          # Update both dependencies to point to the new repo with the new commit hash
+          sed -i 's/git = ".*", rev = ".*"/git = "https:\/\/github.com\/yuunlimm\/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"/' Cargo.toml
+
+      - name: Commit updated Cargo.toml
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add Cargo.toml
+          git commit -m "Update dependencies to https://github.com/yuunlimm/test-workflow2.git with commit ${{ github.event.client_payload.commit_hash }}"
+          git push origin ${{ github.ref }}
+
+      - name: Run Processor Tests
+        run: |
+          echo "Running processor tests for commit ${{ github.event.client_payload.commit_hash }}"
+          cargo test
