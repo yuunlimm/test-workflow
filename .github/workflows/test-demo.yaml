@@ -15,28 +15,25 @@ jobs:
           fetch-depth: 0  # Ensure the full history is fetched
           ref: main  # Ensure you're checking out the correct branch
 
-      - name: Verify List Root Directory
+      - name: List Root Directory
         run: ls -al  # List all files and folders in the root directory to verify structure
 
-      - name: Verify List Files in test-workflow
-        run: ls -al test-workflow  # List the contents of the test-workflow directory
-
-      - name: Verify List Files in test-workflow/demo
-        run: ls -al test-workflow/demo  # List the contents of test-workflow/demo directory (if it exists)
+      - name: List Files in demo directory
+        run: ls -al demo  # List the contents of the demo directory
 
       - name: Update Cargo.toml with new commit hash
         run: |
           echo "Updating aptos-system-utils and aptos-indexer-test-transactions to use https://github.com/yuunlimm/test-workflow2.git with commit hash ${{ github.event.client_payload.commit_hash }}"
-          sed -i 's/git = ".*", rev = ".*"/git = "https:\/\/github.com\/yuunlimm\/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"/' test-workflow/demo/Cargo.toml
+          sed -i 's/git = ".*", rev = ".*"/git = "https:\/\/github.com\/yuunlimm\/test-workflow2.git", rev = "${{ github.event.client_payload.commit_hash }}"/' demo/Cargo.toml
 
       - name: Commit updated Cargo.toml
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add test-workflow/demo/Cargo.toml
+          git add demo/Cargo.toml
           git commit -m "Update dependencies to https://github.com/yuunlimm/test-workflow2.git with commit ${{ github.event.client_payload.commit_hash }}"
           git push origin ${{ github.ref }}
 
       - name: Run Processor Tests
         run: |
-          cargo test --manifest-path=test-workflow/demo/Cargo.toml
+          cargo test --manifest-path=demo/Cargo.toml
