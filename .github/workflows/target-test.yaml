@@ -1,0 +1,24 @@
+name: Run Processor Tests on JSON Change
+
+on:
+  repository_dispatch:
+    types: [json-change-detected]  # Listens for the dispatched event
+
+jobs:
+  run_processor_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Run Processor Tests
+        run: |
+          echo "Running processor tests for commit ${{ github.event.client_payload.commit_hash }}"
+          # Replace with the actual test command for your setup
+          cargo test --features "integration-tests"
+
+      - name: Post Test Results
+        if: ${{ failure() }}
+        run: |
+          echo "Processor tests failed for commit: ${{ github.event.client_payload.commit_hash }}"
