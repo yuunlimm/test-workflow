@@ -1,0 +1,20 @@
+name: action-test
+on:
+  workflow_dispatch:
+    inputs:
+      distinct_id:
+      commit_hash:
+        description: 'Commit hash to use for the dependency update'
+        required: true
+        default: 'main'
+  push:
+    branches:
+      - main  # Ensure you're pushing to this branch or a valid branch name
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo distinct ID
+        run: |
+          echo ${{ github.event.inputs.distinct_id }}
